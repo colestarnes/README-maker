@@ -1,25 +1,35 @@
 var inquirer = require("inquirer");
-var fs = require('fs');
+var fs = require('fs');  
+var util = require('util'); 
 
-inquirer.prompt([
+
+console.clear();  
+
+function promptUser() {
+  return inquirer.prompt([
   {
     type: "input",
-    name: "Title",
+    message: "Github username: ",
+    name: "github"
+  },
+  {
+    type: "input",
+    name: "title",
     message: "Project Title: "
   },
   {
     type: "input",
     message: "Description: ",
     name: "description",
-  },  
-  {
-    type: "input", 
-    name: "instillation",  
-    message: "Instillation: "
-  }, 
+  },
   {
     type: "input",
-    name: "Usage", 
+    name: "installation",
+    message: "Installation: "
+  },
+  {
+    type: "input",
+    name: "usage",
     message: "Usage: "
   },
   {
@@ -31,23 +41,73 @@ inquirer.prompt([
       "MIT",
       "GPL"
     ]
-  }, 
+  },
+  {
+    type: "input",
+    message: "Who contributed? ",
+    name: "contributing"
+  },
+  {
+    type: "input",
+    message: "Test(s): ",
+    name: "tests"
+  },
+
   {
     type: "input", 
-    message: "Github username: ", 
-    name: "github"
+    message: "Email address: ", 
+    name: "email"
   }
-]).then(function(data) {
+  ])
 
-  var filename = data.name.toLowerCase().split(' ').join('') + ".json";
+};
 
-  fs.writeFile(filename, JSON.stringify(data, null, '\t'), function(err) {
+function generateMarkdown(response) {
+console.clear();
+return ` # ${response.title} 
 
-    if (err) {
-      return console.log(err);
-    }
+# Table of Contents 
+- [Description](#description) 
+- [Installation](#installation)  
+- [Usage](#usage) 
+- [Contributing](#contributing) 
+- [Test(s)](#tests) 
+- [Questions](#questions)
 
-    console.log("Success!");
+## Description 
+License: ${response.license}
+${response.description}
 
-  });
-});
+## Installation 
+${response.installation}
+
+## Usage 
+${response.usage}
+
+## Contributing
+${response.contributing}
+
+## Test(s) 
+${response.tests}
+ 
+## Questions? 
+[Github Profile](https://github.com/${response.github}) 
+Send me an email for additional questions: ${response.email}
+
+`; 
+}
+
+async function init() {
+  try {
+const response = await promptUser(); 
+
+const readMe = generateMarkdown(response); //try "response" instead of "data"
+
+await fs.writeFileSync("README.md", readMe); 
+console.log("Success!");
+  } catch (err) {
+    console.log(err);
+  }
+} 
+
+init();
